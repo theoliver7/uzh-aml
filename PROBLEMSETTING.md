@@ -1,8 +1,33 @@
 # Project proposal
+Carlos Kirchdorfer, carlos.kirchdorfer@uzh.ch, 19-720-002
+Oliver Aschwanden, oliverrobin.aschwanden@uzh.ch, 19-874-627
+Marco Heiniger, marco.heiniger@uzh.ch, 18-733-824
 
+## Overview
+The goal of this project is to explore further possibilities of improving the approach of the paper _Hierarchical Graph Pooling with Structure Learning_ (https://arxiv.org/abs/1911.05954). In general, the paper tries to improve predictions with Graph Neural Networks (GNN). In more detail, they have introduced a new approach to graph pooling, wherein they adaptively select a subset of nodes to form an induced subgraph for the subsequent layer. This selection is accompanied by a structure learning mechanism that refines the graph structure for the pooled graph at each layer. The aim is to preserve the integrity of the graph's topological information.
+
+
+## Problem formulation
 Given a set of graph data $\mathcal{G} = \{G_1, G_2, \dots, G_n\}$, where the number of nodes and edges in each graph might be quite different. For an arbitrary graph $G_i = (V_i, E_i, X_i)$, we have $n_i$ and $e_i$ denote the number of nodes and edges, respectively. Let $\mathbf{A}_i \in \mathbb{R}^{n_i \times n_i}$ be the adjacency matrix describing its edge connection information and $\mathbf{X}_i \in \mathbb{R}^{n_i \times f}$ represent the node feature matrix, where $f$ is the dimension of node attributes. Label matrix $\mathbf{Y} \in \mathbb{R}^{n \times c}$ indicates the associated labels for each graph, i.e., if $G_i$ belongs to class $j$, then $Y_{ij} = 1$, otherwise $Y_{ij} = 0$. Since the graph structure and node numbers change between layers due to the graph pooling operation, we further represent the $i$-th graph fed into the $k$-th layer as $G_k^i$ with $n_k^i$ nodes. The adjacency matrix and hidden representation matrix are then denoted as $\mathbf{A}_k^i \in \mathbb{R}^{n_k^i \times n_k^i}$ and $\mathbf{H}_k^i \in \mathbb{R}^{n_k^i \times d}$. With the above notations, we formally define our problem as follows:
 
 **Input:** Given a set of graphs $\mathcal{G}_L$ with its label information $\mathbf{Y}_L$, the number of graph neural network layers $K$, pooling ratio $r$, and representation dimension $d$ in each layer.
 
 **Output:** Our goal is to predict the unknown graph labels of $\mathcal{G}/\mathcal{G}_L$ with graph neural network in an end-to-end way.
+
+## Approach and self-contributions
+1. We start by rebuilding the proposed model from the original paper 
+2. The next step is to apply the following modifications and check them for possible improvements:
+    1. Modify the read out function (don't use all the pooled graphs for readout)
+    2. Introduce a deeper network with an eventual modification of the convolution layer such that the downsampling gets reduced.
+    3. Different top-rank node selection (based on node information score) 
+    4. Apply a different structure learning approach (Li et al. 2018). Also use different parameters, e.g. different trade-off parameter &#955;
+    5. Utilize various activation functions, which can also be applied in structure learning.
+
+
+Importantly, it should be noted that we are solely focusing on one dataset out of those tested in the paper, and further modifications, not listed, may be implemented during the project
+
+## Evaluation
+The evaluation metrics are going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper which means that we focus on accuracy. This way we ensure equal test settings. 
+
+Moreover we will also implement a basic GNN based on the paper _A Simple Baseline Algorithm for Graph Classification_ (https://arxiv.org/pdf/1810.09155.pdf) such that we can compare it to our more complex model.
 
