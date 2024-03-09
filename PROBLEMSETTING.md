@@ -1,6 +1,6 @@
 # Project proposal
-Carlos Kirchdorfer, carlos.kirchdorfer@uzh.ch, 19-720-002
-Oliver Aschwanden, oliverrobin.aschwanden@uzh.ch, 19-874-627
+Carlos Kirchdorfer, carlos.kirchdorfer@uzh.ch, 19-720-002 \
+Oliver Aschwanden, oliverrobin.aschwanden@uzh.ch, 19-874-627 \
 Marco Heiniger, marco.heiniger@uzh.ch, 18-733-824
 
 ## Overview
@@ -8,7 +8,7 @@ The goal of this project is to explore further possibilities of improving the ap
 
 
 ## Problem formulation
-Consider a set of graphs $\\mathcal{G} = \\{G_1, G_2, \\dots, G_n\\}$. Each graph within this collection may contain a variable number of nodes and edges. For an arbitrary graph $G_i = (V_i, E_i, X_i)$, we have $n_i$ and $e_i$ denote the number of nodes and edges, respectively. Let $\mathbf{A_i} \in \mathbb{R}^{n_i \times n_i}$ be the adjacency matrix describing its edge connections and $\mathbf{X_i} \in \mathbb{R}^{n_i \times f}$ represent the node feature matrix, where $f$ is the dimension of node attributes. Label matrix $\mathbf{Y} \in \mathbb{R}^{n \times c}$ indicates the associated labels for each graph. For example if $G_i$ belongs to class $j$, then $Y_{ij} = 1$, else $Y_{ij} = 0$. Acknowledging that the graph architecture and the count of nodes may shift across layers due to pooling operations within the graph, we further represent the $i$-th graph fed into the $k$-th layer as $G_i^k$ with $n_i^k$ nodes. The adjacency matrix and hidden representation matrix are then denoted as $\mathbf{A}_i^k \in \mathbb{R}^{n_i^k \times n_i^k}$ and $\mathbf{H}_i^k \in \mathbb{R}^{n_i^k \times d}$. Now we can define our problem the following way:
+Consider a set of graphs $\\mathcal{G} = \\{G_1, G_2, \\dots, G_n\\}$. Each graph within this collection may contain a variable number of nodes and edges. For an arbitrary graph $G_i = (V_i, E_i, X_i)$, we have $n_i$ and $e_i$ denote the number of nodes and edges, respectively. Let $\mathbf{A_i} \in \mathbb{R}^{n_i \times n_i}$ be the adjacency matrix describing its edge connections and $\mathbf{X_i} \in \mathbb{R}^{n_i \times f}$ represent the node feature matrix, where $f$ is the dimension of node attributes. Label matrix $\mathbf{Y} \in \mathbb{R}^{n \times c}$ indicates the associated labels for each graph. For example if $G_i$ belongs to class $j$, then $Y_{ij} = 1$, else $Y_{ij} = 0$. Now we can define our problem the following way:
 
 **Input:** We start with a set of graphs $\mathcal{G}_L$ with its label information $\mathbf{Y}_L$, the number of graph neural network layers $K$, pooling ratio $r$, and dimension $d$ in each layer.
 
@@ -31,4 +31,3 @@ Importantly, it should be noted that we are solely focusing on one dataset out o
 The evaluation metrics are going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper which means that we focus on accuracy. This way we ensure equal test settings. 
 
 Moreover we will also implement a basic GNN based on the paper _A Simple Baseline Algorithm for Graph Classification_ (https://arxiv.org/pdf/1810.09155.pdf) such that we can compare it to our more complex model.
-
