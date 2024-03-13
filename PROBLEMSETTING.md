@@ -8,13 +8,11 @@ The goal of this project is to explore further possibilities of improving the ap
 
 
 ## Problem formulation
-Consider a set of graphs $\\mathcal{G} = \\{G_1, G_2, \\dots, G_n\\}$. Each graph within this collection may contain a variable number of nodes and edges. For an arbitrary graph $G_i = (V_i, E_i, X_i)$, we have $n_i$ and $e_i$ denote the number of nodes and edges, respectively. Let $\mathbf{A_i} \in \mathbb{R}^{n_i \times n_i}$ be the adjacency matrix describing its edge connections and $\mathbf{X_i} \in \mathbb{R}^{n_i \times f}$ represent the node feature matrix, where $f$ is the dimension of node attributes. Label matrix $\mathbf{Y} \in \mathbb{R}^{n \times c}$ indicates the associated labels for each graph. For example if $G_i$ belongs to class $j$, then $Y_{ij} = 1$, else $Y_{ij} = 0$. Now we can define our problem the following way:
+In the field of bioinformatic proteins structures can be modeled as a graph, where the nodes represent amino acides, which have an edge if they are less than 6 Angstroms apart. The [D&D Dataset](https://pubmed.ncbi.nlm.nih.gov/12850146/) contains a set 1178 of these proteins graphs $\\mathcal{G} = \\{G_1, G_2, \\dots, G_n\\}$. Each protein within this collection may contain a variable number of amino acids(nodes) and connections(edges). For an arbitrary graph $G_i = (V_i, E_i, X_i)$, we have $n_i$ and $e_i$ denote the number of amino acids and connections, respectively. Let $\mathbf{A_i} \in \mathbb{R}^{n_i \times n_i}$ be the adjacency matrix describing its edge connections and $\mathbf{X_i} \in \mathbb{R}^{n_i \times f}$ represent the node feature matrix, where $f$ is the dimension of node attributes. These protein structure can either be enzymes or non-enzymes represented through a graph label matrix $\mathbf{Y} \in \mathbb{R}^{n \times c}$.Now we can define our problem the following way:
 
-**Input:** We start with a set of graphs $\mathcal{G}_L$ with its label information $\mathbf{Y}_L$, the number of graph neural network layers $K$, pooling ratio $r$, and dimension $d$ in each layer.
+**Input:** We start with a set of graphs $\mathcal{G}_L$ with its label information $\mathbf{Y}_L$, ~~the number of graph neural network layers $K$, pooling ratio $r$, and dimension $d$ in each layer.~~
 
-**Output:** The aim of the task is to predict the unknown graph labels of $\mathcal{G}/\mathcal{G}_L$ with our graph neural network implementation.
-
-- More concrete, focus on data set, (Consider a moluecule, which are a set of graphs and predict if they cause cancer, nodes == atoms, ), we focus on D&D data set (there are also different papers on paperswithcode from which we can get "inspiration".)
+**Task:** The classification task is to decide if a protein structure $G_i$ belongs to class the enzym $Y_{ij} = 1$ , or is a non-enzym $Y_{ij} = 0$.
 
 ## Approach and self-contributions
 1. We start by rebuilding the proposed model from the original paper 
@@ -24,15 +22,18 @@ Consider a set of graphs $\\mathcal{G} = \\{G_1, G_2, \\dots, G_n\\}$. Each grap
     3. Use a different node information score metric (e.g., instead of using the Manhatten distance, we use the Euclidean distance)
     4. Different top-rank node selection (based on node information score)
 
-
-Importantly, it should be noted that we are solely focusing on one dataset out of those tested in the paper, and further modifications, not listed, may be implemented during the project
-
 ## Evaluation
 - Be sure to define the evaluation pipeline (state the train/test split, make sure to work with same data in order to ensure comparability, WRITE MORE STUFF, define a concrete baseline)
+- The evaluation metrics are going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper which means that we focus on accuracy. This way we ensure equal test settings. 
+To make our numbers comparable to the ones from the paper we follow the same evaluation protocol
+```
+1. Randomly split each dataset into three parts: 80% as training set, 10% as validation set and the remaining 10% as test set. 
+2. We repeat this randomly splitting process 10 times
+3. Report the average performance with standard derivation
+```
+### Baselines
+#### Statistical Model: Graphlets
+As the original paper we can compare our results to a statistical baseline like Graphlets (http://proceedings.mlr.press/v5/shervashidze09a.html)
+#### SOTA: 
+According to papers with code the SOTA on this Dataset is MEWISPool, that are trained in an supervised fashion (https://paperswithcode.com/sota/graph-classification-on-dd) 
 
-- Baseline we should include: Very simple ML/statistical model, state of the art ML baseline
--> Be more concrete about baseline formulation
-  
-The evaluation metrics are going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper which means that we focus on accuracy. This way we ensure equal test settings. 
-
-Moreover we will also implement a basic GNN based on the paper _A Simple Baseline Algorithm for Graph Classification_ (https://arxiv.org/pdf/1810.09155.pdf) such that we can compare it to our more complex model.
