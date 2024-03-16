@@ -15,25 +15,26 @@ In the field of bioinformatic proteins structures can be modeled as a graph, whe
 **Task:** The classification task is to decide if a protein structure $G_i$ belongs to class the enzym $Y_{ij} = 1$ , or is a non-enzym $Y_{ij} = 0$.
 
 ## Approach and self-contributions
-1. We start by rebuilding the proposed model from the original paper 
-2. The next step is to apply the following modifications and check them for possible improvements:
+1. We start by rebuilding the proposed model from the original paper. 
+2. Then we will implement the simple baseline model Graphlets 
+3. The next step is to apply the following modifications and check them for possible improvements:
     1. Modify the read out function (don't use all the pooled graphs for readout)
     2. Introduce a deeper network with an eventual modification of the convolution layer such that the downsampling gets reduced.
     3. Use a different node information score metric (e.g., instead of using the Manhatten distance, we use the Euclidean distance)
     4. Different top-rank node selection (based on node information score)
 
 ## Evaluation
-- Be sure to define the evaluation pipeline (state the train/test split, make sure to work with same data in order to ensure comparability, WRITE MORE STUFF, define a concrete baseline)
-- The evaluation metrics are going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper which means that we focus on accuracy. This way we ensure equal test settings. 
-To make our numbers comparable to the ones from the paper we follow the same evaluation protocol
-```
+The evaluation protocol is going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper. In this way, we ensure our numbers are comparable to those presented in the paper by adhering to the evaluation protocol outlined as follows:
 1. Randomly split each dataset into three parts: 80% as training set, 10% as validation set and the remaining 10% as test set. 
 2. We repeat this randomly splitting process 10 times
 3. Report the average performance with standard derivation
-```
+
 ### Baselines
-#### Statistical Model: Graphlets
-As the original paper we can compare our results to a statistical baseline like Graphlets (http://proceedings.mlr.press/v5/shervashidze09a.html)
-#### SOTA: 
-According to papers with code the SOTA on this Dataset is MEWISPool, that are trained in an supervised fashion (https://paperswithcode.com/sota/graph-classification-on-dd) 
+- **HPG-SL**:
+Our primary goal will be to surpass the paper's baseline, which was 80.96% accuracy
+- **Graphlets:**
+To have a simple statistical baseline we will use the graph kernel model Graphlets. We will mainly stick to the original paper for the implementation. (http://proceedings.mlr.press/v5/shervashidze09a.html)
+- **MEWISPool:** 
+We also acknowledge the current SOTA model (according to paperswithcode.com) as comparison which was tested on the D&D dataset with an accuracy of 84.33%.(https://paperswithcode.com/sota/graph-classification-on-dd) 
+
 
