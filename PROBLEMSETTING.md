@@ -32,9 +32,8 @@ The evaluation protocol is going to be the same as in the _Hierarchical Graph Po
 ### Baselines
 - **HPG-SL**:
 Our primary goal will be to surpass the paper's baseline, which was 80.96% accuracy
-- **Graphlets:**
+- **Graphlets:** 
 To have a simple statistical baseline we will use the graph kernel model Graphlets. We will mainly stick to the original paper for the implementation. (http://proceedings.mlr.press/v5/shervashidze09a.html)
-- **MEWISPool:** 
-We also acknowledge the current SOTA model (according to paperswithcode.com) as comparison which was tested on the D&D dataset with an accuracy of 84.33%.(https://paperswithcode.com/sota/graph-classification-on-dd) 
+__or maybe something from here: https://github.com/jajupmochi/graphkit-learn?tab=readme-ov-file__
 
 
