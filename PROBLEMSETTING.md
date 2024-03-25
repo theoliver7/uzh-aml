@@ -24,16 +24,16 @@ In the field of bioinformatics, protein structures can be modeled as a graph, wh
     4. Different top-rank node selection (based on node information score)
 
 ## Evaluation
-The evaluation protocol is going to be the same as in the _Hierarchical Graph Pooling with Structure Learning_ paper. In this way, we ensure our numbers are comparable to those presented in the paper by adhering to the evaluation protocol outlined as follows:
-1. Randomly split each dataset into three parts: 80% as training set, 10% as validation set and the remaining 10% as test set. 
-2. We repeat this randomly splitting process 10 times
-3. Report the average performance with standard derivation
+For the evaluation we propose the following procedure such that reproducibility is assured.
+
+1. Randomly split each dataset into two parts: 90% as training set and the remaining 10% as test set and save the ids. 
+2. We will perform cross-validation on the train data with a split of 5.
+3. Report the performance.
 
 ### Baselines
 - **HPG-SL**:
-Our primary goal will be to surpass the paper's baseline, which was 80.96% accuracy
-- **Graphlets:** 
-To have a simple statistical baseline we will use the graph kernel model Graphlets. We will mainly stick to the original paper for the implementation. (http://proceedings.mlr.press/v5/shervashidze09a.html)
-__or maybe something from here: https://github.com/jajupmochi/graphkit-learn?tab=readme-ov-file__
+Our primary goal will be to surpass the paper's baseline, which was 80.96% accuracy.
+- **Shortest-Path Kernel:** 
+To have a simple statistical baseline we will use the graph kernel model Shortest-Path. We will mainly stick to the original paper for the implementation. (https://www.dbs.ifi.lmu.de/Publikationen/Papers/borgwardt.pdf)
 
 
