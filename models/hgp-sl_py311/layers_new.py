@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sparse_softmax_old import Sparsemax
+from sparse_softmax_new import Sparsemax
 from torch.nn import Parameter
 from torch_geometric.data import Data
 from torch_geometric.nn.conv import MessagePassing
-from torch_geometric.nn.pool.topk_pool import topk, filter_adj
+from torch_geometric.nn.pool.connect.filter_edges import filter_adj
+from torch_geometric.nn.pool.select.topk import topk
 from torch_geometric.utils import softmax, dense_to_sparse, add_remaining_self_loops
 from torch_scatter import scatter_add
 from torch_sparse import spspmm, coalesce
@@ -28,7 +29,9 @@ class TwoHopNeighborhood(object):
             value = value.view(-1, *[1 for _ in range(edge_attr.dim() - 1)])
             value = value.expand(-1, *list(edge_attr.size())[1:])
             edge_attr = torch.cat([edge_attr, value], dim=0)
-            data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min', fill_value=fill)
+            data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min',
+                                                  #fill_value=fill
+                                                  )
             edge_attr[edge_attr >= fill] = 0
             data.edge_attr = edge_attr
 
@@ -164,6 +167,7 @@ class HGPSLPool(torch.nn.Module):
         self.negative_slop = negative_slop
         self.lamb = lamb
 
+
         self.att = Parameter(torch.Tensor(1, self.in_channels * 2))
         nn.init.xavier_uniform_(self.att.data)
         self.sparse_attention = Sparsemax()
@@ -173,12 +177,15 @@ class HGPSLPool(torch.nn.Module):
     def forward(self, x, edge_index, edge_attr, batch=None):
         if batch is None:
             batch = edge_index.new_zeros(x.size(0))
-
+        #x_information_score has the form of Tensor:(all_nodes_of_current_batch, nhid) (same form as x)
         x_information_score = self.calc_information_score(x, edge_index, edge_attr)
         score = torch.sum(torch.abs(x_information_score), dim=1)
-
+        """
+        Graph Pooling is the first major component of the HGP-SL operator. It preserves a subset of informative nodes and forms a smaller induced subgraph.
+        """
         # Graph Pooling
         original_x = x
+
         perm = topk(score, self.ratio, batch)
         x = x[perm]
         batch = batch[perm]
@@ -188,6 +195,10 @@ class HGPSLPool(torch.nn.Module):
         if self.sl is False:
             return x, induced_edge_index, induced_edge_attr, batch
 
+        """
+        Structure learning: It learns a refined graph structure for the pooled subgraph. Advantage of SL: It is able to preserve the essential graph structure information
+        which will facilitate the message passing procedure.
+        """
         # Structure Learning
         if self.sample:
             # A fast mode for large graphs.

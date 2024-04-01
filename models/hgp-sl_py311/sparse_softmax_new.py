@@ -1,4 +1,12 @@
 """
+An original implementation of sparsemax (Martins & Astudillo, 2016) is available at
+https://github.com/OpenNMT/OpenNMT-py/blob/master/onmt/modules/sparse_activations.py.
+See `From Softmax to Sparsemax: A Sparse Model of Attention and Multi-Label Classification, ICML 2016`
+for detailed description.
+
+We make some modifications to make it work at scatter operation scenarios, e.g., calculate softmax according to batch
+indicators.
+
 Usage:
 >> x = torch.tensor([ 1.7301,  0.6792, -1.0565,  1.6614, -0.3196, -0.7790, -0.3877, -0.4943,
          0.1831, -0.0061])

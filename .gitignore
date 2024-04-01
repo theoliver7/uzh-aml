@@ -1,3 +1,7 @@
 .idea
+__pycache__
+models/hgp-sl_py36/data
+models/hgp-sl_py311/data
 _pycache_
 /data
+*.pth

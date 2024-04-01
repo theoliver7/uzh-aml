@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn.pool import global_mean_pool as gap, global_max_pool as gmp
+from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 from torch_geometric.nn import GCNConv
 
-from layers import GCN, HGPSLPool
+from layers_new import GCN, HGPSLPool
 
 
 class Model(torch.nn.Module):
@@ -33,9 +33,10 @@ class Model(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
-        edge_attr = None
 
-        x = F.relu(self.conv1(x, edge_index, edge_attr))
+        edge_attr = None
+        x = self.conv1(x, edge_index, edge_attr)
+        x = F.relu(x)
         x, edge_index, edge_attr, batch = self.pool1(x, edge_index, edge_attr, batch)
         x1 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 

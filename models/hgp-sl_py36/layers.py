@@ -5,34 +5,13 @@ from sparse_softmax import Sparsemax
 from torch.nn import Parameter
 from torch_geometric.data import Data
 from torch_geometric.nn.conv import MessagePassing
-from torch_geometric.nn import TopKPooling #, filter_adj
+from torch_geometric.nn.pool.topk_pool import topk, filter_adj
 from torch_geometric.utils import softmax, dense_to_sparse, add_remaining_self_loops
-from torch_geometric.utils import subgraph
+from torch_scatter import scatter_add
+from torch_sparse import spspmm, coalesce
+
 
 class TwoHopNeighborhood(object):
-    
-    def coalesce(self, edge_index, edge_attr, num_nodes):
-        # Convert edge_index to COO format
-        row, col = edge_index
-        edge_index_sparse = torch.sparse_coo_tensor(row, col, torch.ones_like(row, dtype=torch.float), (num_nodes, num_nodes))
-
-        # If edge_attr is None, initialize it with ones
-        if edge_attr is None:
-            edge_attr = torch.ones(edge_index.size(1), dtype=torch.float)
-
-        # Create the COO format sparse tensor for edge_attr
-        values_sparse = torch.sparse_coo_tensor(row, col, edge_attr, (num_nodes, num_nodes))
-
-        # Combine edge_index_sparse and values_sparse
-        coalesced_tensor = torch.sparse.FloatTensor(edge_index_sparse.indices(), values_sparse.values(), torch.Size([num_nodes, num_nodes]))
-
-        # Extract coalesced edge index and values
-        coalesced_edge_index = coalesced_tensor._indices()
-        coalesced_edge_attr = coalesced_tensor._values()
-
-        return coalesced_edge_index, coalesced_edge_attr
-
-
     def __call__(self, data):
         edge_index, edge_attr = data.edge_index, data.edge_attr
         n = data.num_nodes
@@ -40,20 +19,18 @@ class TwoHopNeighborhood(object):
         fill = 1e16
         value = edge_index.new_full((edge_index.size(1),), fill, dtype=torch.float)
 
-        index = torch.arange(n, device=edge_index.device)
-        index = index.view(1, -1).repeat(n, 1).view(-1)
-        index = torch.cat([index.unsqueeze(0), edge_index], dim=0)
+        index, value = spspmm(edge_index, value, edge_index, value, n, n, n, True)
 
-        value = torch.cat([value.unsqueeze(0), edge_attr], dim=0)
-
-        index, value = index.t().contiguous(), value.t().contiguous()
-        rowptr, col, value = index[:, 0], index[:, 1], value.squeeze(0)
-        index = torch.stack([rowptr, col], dim=0)
-        index, value = self.coalesce(index, value, n, n)
-        edge_index = index
-
-        data.edge_index = edge_index
-        data.edge_attr = value.view(-1, 1)
+        edge_index = torch.cat([edge_index, index], dim=1)
+        if edge_attr is None:
+            data.edge_index, _ = coalesce(edge_index, None, n, n)
+        else:
+            value = value.view(-1, *[1 for _ in range(edge_attr.dim() - 1)])
+            value = value.expand(-1, *list(edge_attr.size())[1:])
+            edge_attr = torch.cat([edge_attr, value], dim=0)
+            data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min', fill_value=fill)
+            edge_attr[edge_attr >= fill] = 0
+            data.edge_attr = edge_attr
 
         return data
 
@@ -92,8 +69,7 @@ class GCN(MessagePassing):
             edge_weight = torch.ones((edge_index.size(1),), dtype=dtype, device=edge_index.device)
 
         row, col = edge_index
-        deg = torch.zeros(num_nodes, dtype=edge_weight.dtype, device=edge_index.device)
-        deg.scatter_add_(0, row, edge_weight)
+        deg = scatter_add(edge_weight, row, dim=0, dim_size=num_nodes)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
 
@@ -143,8 +119,7 @@ class NodeInformationScore(MessagePassing):
             edge_weight = torch.ones((edge_index.size(1),), dtype=dtype, device=edge_index.device)
 
         row, col = edge_index
-        deg = torch.zeros(num_nodes, dtype=edge_weight.dtype, device=edge_index.device)
-        deg.scatter_add_(0, row, edge_weight)
+        deg = scatter_add(edge_weight, row, dim=0, dim_size=num_nodes)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
 
@@ -189,6 +164,7 @@ class HGPSLPool(torch.nn.Module):
         self.negative_slop = negative_slop
         self.lamb = lamb
 
+
         self.att = Parameter(torch.Tensor(1, self.in_channels * 2))
         nn.init.xavier_uniform_(self.att.data)
         self.sparse_attention = Sparsemax()
@@ -198,24 +174,27 @@ class HGPSLPool(torch.nn.Module):
     def forward(self, x, edge_index, edge_attr, batch=None):
         if batch is None:
             batch = edge_index.new_zeros(x.size(0))
-
+        #x_information_score has the form of Tensor:(all_nodes_of_current_batch, nhid) (same form as x)
         x_information_score = self.calc_information_score(x, edge_index, edge_attr)
         score = torch.sum(torch.abs(x_information_score), dim=1)
-
+        """
+        Graph Pooling is the first major component of the HGP-SL operator. It preserves a subset of informative nodes and forms a smaller induced subgraph.
+        """
         # Graph Pooling
         original_x = x
-        perm = TopKPooling(self.in_channels, self.ratio,score, edge_index)
-       
+        perm = topk(score, self.ratio, batch)
         x = x[perm]
         batch = batch[perm]
-        #induced_edge_index, induced_edge_attr = filter_adj(edge_index, edge_attr, perm, num_nodes=score.size(0))
-        induced_edge_index, mask = subgraph(perm, edge_index, relabel_nodes=True)
-        induced_edge_attr = None if edge_attr is None else edge_attr[mask]
+        induced_edge_index, induced_edge_attr = filter_adj(edge_index, edge_attr, perm, num_nodes=score.size(0))
 
         # Discard structure learning layer, directly return
         if self.sl is False:
             return x, induced_edge_index, induced_edge_attr, batch
 
+        """
+        Structure learning: It learns a refined graph structure for the pooled subgraph. Advantage of SL: It is able to preserve the essential graph structure information
+        which will facilitate the message passing procedure.
+        """
         # Structure Learning
         if self.sample:
             # A fast mode for large graphs.
@@ -231,9 +210,7 @@ class HGPSLPool(torch.nn.Module):
                 hop_data = self.neighbor_augment(hop_data)
             hop_edge_index = hop_data.edge_index
             hop_edge_attr = hop_data.edge_attr
-            new_edge_index, mask = subgraph(perm, hop_edge_index, relabel_nodes=True)
-            new_edge_attr = None if hop_edge_attr is None else hop_edge_attr[mask]
-
+            new_edge_index, new_edge_attr = filter_adj(hop_edge_index, hop_edge_attr, perm, num_nodes=score.size(0))
 
             new_edge_index, new_edge_attr = add_remaining_self_loops(new_edge_index, new_edge_attr, 0, x.size(0))
             row, col = new_edge_index
@@ -258,8 +235,7 @@ class HGPSLPool(torch.nn.Module):
             if edge_attr is None:
                 induced_edge_attr = torch.ones((induced_edge_index.size(1),), dtype=x.dtype,
                                                device=induced_edge_index.device)
-            num_nodes = torch.sparse.sum(torch.ones_like(batch, dtype=torch.float), dim=0).to_dense()
-
+            num_nodes = scatter_add(batch.new_ones(x.size(0)), batch, dim=0)
             shift_cum_num_nodes = torch.cat([num_nodes.new_zeros(1), num_nodes.cumsum(dim=0)[:-1]], dim=0)
             cum_num_nodes = num_nodes.cumsum(dim=0)
             adj = torch.zeros((x.size(0), x.size(0)), dtype=torch.float, device=x.device)
@@ -288,4 +264,3 @@ class HGPSLPool(torch.nn.Module):
             torch.cuda.empty_cache()
 
         return x, new_edge_index, new_edge_attr, batch
-
