@@ -1,5 +1,5 @@
 .idea
-__pycache__
+__pycache__/
 models/hgp-sl_py36/data
 models/hgp-sl_py311/data
 _pycache_
