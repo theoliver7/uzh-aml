@@ -13,6 +13,10 @@ This is a PyTorch implementation of the HGP-SL algorithm, which learns a low-dim
 * torch-sparse==0.6.18
 * torch-cluster==1.6.3
 * torch-geometric==2.5.2
+## pip installation commands for cuda 12.1 on windows
+* pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+* pip install torch_geometric
+* pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.1.0+cu121.html
 
 
 ### Datasets
