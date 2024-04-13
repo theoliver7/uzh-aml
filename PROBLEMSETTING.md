@@ -16,7 +16,7 @@ In the field of bioinformatics, protein structures can be modeled as a graph, wh
 
 ## Approach and self-contributions
 1. We start by rebuilding the proposed model from the original paper. 
-2. Then we will implement the simple baseline model Graphlets 
+2. Then we will implement the simple baseline model Shortest-Path Kernel 
 3. The next step is to apply the following modifications and check them for possible improvements:
     1. Modify the read out function (don't use all the pooled graphs for readout)
     2. Introduce a deeper network with an eventual modification of the convolution layer such that the downsampling gets reduced.
