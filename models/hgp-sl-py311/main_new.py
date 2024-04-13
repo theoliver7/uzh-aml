@@ -5,9 +5,9 @@ import time
 
 import torch
 import torch.nn.functional as F
-from models import Model
+from models_new import Model
 from torch.utils.data import random_split
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import TUDataset
 
 torch.set_printoptions(edgeitems =10)
@@ -16,15 +16,15 @@ torch.set_printoptions(edgeitems =10)
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--seed', type=int, default=777, help='random seed')
-parser.add_argument('--batch_size', type=int, default=60, help='batch size')
-parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+parser.add_argument('--batch_size', type=int, default=64, help='batch size')
+parser.add_argument('--lr', type=float, default=0.0001, help='learning rate')
 parser.add_argument('--weight_decay', type=float, default=0.001, help='weight decay')
 parser.add_argument('--nhid', type=int, default=128, help='hidden size')
 parser.add_argument('--sample_neighbor', type=bool, default=True, help='whether sample neighbors')
 parser.add_argument('--sparse_attention', type=bool, default=True, help='whether use sparse attention')
 parser.add_argument('--structure_learning', type=bool, default=True, help='whether perform structure learning')
-parser.add_argument('--pooling_ratio', type=float, default=0.5, help='pooling ratio')
-parser.add_argument('--dropout_ratio', type=float, default=0.0, help='dropout ratio')
+parser.add_argument('--pooling_ratio', type=float, default=0.3, help='pooling ratio')
+parser.add_argument('--dropout_ratio', type=float, default=0.5, help='dropout ratio')
 parser.add_argument('--lamb', type=float, default=1.0, help='trade-off parameter')
 parser.add_argument('--dataset', type=str, default='DD', help='DD/PROTEINS/NCI1/NCI109/Mutagenicity/ENZYMES')
 parser.add_argument('--device', type=str, default='cpu', help='specify cuda devices')
@@ -33,6 +33,7 @@ parser.add_argument('--patience', type=int, default=100, help='patience for earl
 
 args = parser.parse_args()
 # Right after args = parser.parse_args()
+print(torch.cuda.is_available())
 if torch.cuda.is_available():
     args.device = 'cuda'
 else:
@@ -43,7 +44,7 @@ torch.manual_seed(args.seed)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(args.seed)
 
-dataset = TUDataset(os.path.join('data', args.dataset), name=args.dataset, use_node_attr=True)
+dataset = TUDataset(os.path.join('../../data', args.dataset), name=args.dataset, use_node_attr=True)
 
 args.num_classes = dataset.num_classes
 args.num_features = dataset.num_features
@@ -83,7 +84,6 @@ def train():
             loss.backward()
             optimizer.step()
             loss_train += loss.item()
-            useless_var = out.max(dim=1)
             pred = out.max(dim=1)[1]
             correct += pred.eq(data.y).sum().item()
         acc_train = correct / len(train_loader.dataset)

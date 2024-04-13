@@ -1,3 +1,4 @@
+import os
 import pickle
 import numpy as np
 import networkx as nx
@@ -27,17 +28,22 @@ def create_networkx_graphs(data_folder, dataset_name):
       pickle.dump(graphs, f)
   
 
-def load_labels(data_folder,filename):
-  with open(f"{data_folder}\{filename}_graph_labels.txt", "r") as f:
+def load_labels(data_folder):
+  with open(f"{data_folder}_graph_labels.txt", "r") as f:
     lines = f.readlines()
     labels = np.array([int(line.strip()) for line in lines], dtype=int)
   with open("labels.pickle", "wb") as f:
       pickle.dump(labels, f)
 
 if __name__ == '__main__':
-    data_folder = "data\DD"
-    dataset_name = "DD"
+    # Get the current working directory
+    current_folder = os.getcwd()
+    # Navigate two levels up
+    two_levels_up = os.path.abspath(os.path.join(current_folder, '../../'))
+
+    data_folder = os.path.join(two_levels_up, 'data/DD/DD/raw/DD')
+    print(data_folder)
     print("started networkx graph creation")
     #graphs_dict = create_networkx_graphs(data_folder, dataset_name)
-    labels = load_labels(data_folder,dataset_name)
+    labels = load_labels(data_folder)
     print("finished preprocessing")

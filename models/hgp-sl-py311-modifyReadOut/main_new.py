@@ -44,7 +44,7 @@ torch.manual_seed(args.seed)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(args.seed)
 
-dataset = TUDataset(os.path.join('data', args.dataset), name=args.dataset, use_node_attr=True)
+dataset = TUDataset(os.path.join('../../data', args.dataset), name=args.dataset, use_node_attr=True)
 
 args.num_classes = dataset.num_classes
 args.num_features = dataset.num_features
