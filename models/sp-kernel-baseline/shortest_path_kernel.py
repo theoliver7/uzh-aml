@@ -146,11 +146,11 @@ if __name__ == '__main__':
     # Compute shortest path kernels using graphkit-learn
     shortest_path = GK_SP()
 
-    #shortest_path_kernel_train, _ , _ = spkernel(X_train,n_jobs=1) # funktioniert nicht mit spkernel
-    #shortest_path_kernel_test,_ , _ = spkernel(X_test, X_train,n_jobs=1) 
-    shortest_path_kernel_train = shortest_path.compare_list(X_train,X_train)
-    shortest_path_kernel_test = shortest_path.compare_list(X_test,X_train)
-  
+    shortest_path_kernel_train, _ , _ = spkernel(X_train,n_jobs=1) # funktioniert nicht mit spkernel
+    shortest_path_kernel_test,_ , _ = spkernel(X_test, X_train,n_jobs=1)
+    # shortest_path_kernel_train = shortest_path.compare_list(X_train,X_train)
+    # shortest_path_kernel_test = shortest_path.compare_list(X_test,X_train)
+    #
     print("created kernel")
 
     # Create and train an SVM classifier

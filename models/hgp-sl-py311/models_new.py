@@ -10,15 +10,15 @@ class Model(torch.nn.Module):
     def __init__(self, args):
         super(Model, self).__init__()
         self.args = args
-        self.num_features = args.num_features
-        self.nhid = args.nhid
-        self.num_classes = args.num_classes
-        self.pooling_ratio = args.pooling_ratio
-        self.dropout_ratio = args.dropout_ratio
-        self.sample = args.sample_neighbor
-        self.sparse = args.sparse_attention
-        self.sl = args.structure_learning
-        self.lamb = args.lamb
+        self.num_features = args["num_features"]
+        self.nhid = args["nhid"]
+        self.num_classes = args["num_classes"]
+        self.pooling_ratio = args["pooling_ratio"]
+        self.dropout_ratio = args["dropout_ratio"]
+        self.sample = args["sample_neighbor"]
+        self.sparse = args["sparse_attention"]
+        self.sl = args["structure_learning"]
+        self.lamb = args["lamb"]
 
         self.conv1 = GCNConv(self.num_features, self.nhid)
         self.conv2 = GCN(self.nhid, self.nhid)
