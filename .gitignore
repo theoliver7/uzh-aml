@@ -1,7 +1,7 @@
 .idea
 __pycache__/
-models/hgp-sl-py36/data
-models/hgp-sl-py311/data
+models/hgp_sl_py36/data
+models/hgp_sl_py311/data
 _pycache_
 /data
 *.pth
