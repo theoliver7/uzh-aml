@@ -5,3 +5,4 @@ models/hgp-sl-py311/data
 _pycache_
 /data
 *.pth
+.DS_Store
