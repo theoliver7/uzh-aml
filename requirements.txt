@@ -10,6 +10,7 @@ torchaudio==2.2.2
 torchvision==0.17.2
 
 notebook
+grakel
 
 -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 
