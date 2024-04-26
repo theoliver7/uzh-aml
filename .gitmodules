@@ -1,0 +1,3 @@
+[submodule "GraKeL"]
+	path = GraKeL
+	url = git@github.com:theoliver7/GraKeL.git
