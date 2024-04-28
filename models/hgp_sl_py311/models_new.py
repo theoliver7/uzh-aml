@@ -20,12 +20,19 @@ class Model(torch.nn.Module):
         self.sl = args["structure_learning"]
         self.lamb = args["lamb"]
 
-        self.conv1 = GCNConv(self.num_features, self.nhid)
-        self.conv2 = GCN(self.nhid, self.nhid)
-        self.conv3 = GCN(self.nhid, self.nhid)
+        self.dist = args["dist"]
 
-        self.pool1 = HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb)
-        self.pool2 = HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb)
+        self.convolutions = torch.nn.ModuleList()
+
+        self.convolutions.append(GCNConv(self.num_features, self.nhid))
+        self.convolutions.append(GCN(self.nhid, self.nhid))
+        self.convolutions.append(GCN(self.nhid, self.nhid))
+
+        self.pooling_layers = torch.nn.ModuleList()
+        self.pooling_layers.append(
+            HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb, self.dist))
+        self.pooling_layers.append(
+            HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb, self.dist))
 
         self.lin1 = torch.nn.Linear(self.nhid * 2, self.nhid)
         self.lin2 = torch.nn.Linear(self.nhid, self.nhid // 2)
@@ -35,19 +42,20 @@ class Model(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         edge_attr = None
-        x = self.conv1(x, edge_index, edge_attr)
-        x = F.relu(x)
-        x, edge_index, edge_attr, batch = self.pool1(x, edge_index, edge_attr, batch)
-        x1 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
-
-        x = F.relu(self.conv2(x, edge_index, edge_attr))
-        x, edge_index, edge_attr, batch = self.pool2(x, edge_index, edge_attr, batch)
-        x2 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
+        concat = []
+        for idx, conv in enumerate(self.convolutions):
+            x = conv(x, edge_index, edge_attr)
+            if idx == 0:
+                x = F.relu(x)
+            if idx != len(self.convolutions) - 1:
+                x, edge_index, edge_attr, batch = self.pooling_layers[0](x, edge_index, edge_attr, batch)
+            concat.append(torch.cat([gmp(x, batch), gap(x, batch)], dim=1))
 
         x = F.relu(self.conv3(x, edge_index, edge_attr))
-        x3 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
-        x = F.relu(x1) + F.relu(x2) + F.relu(x3)
+        x = sum(F.relu(x_layer) for x_layer in concat)
+
+        # x = F.relu(x1) + F.relu(x2) + F.relu(x3)
 
         x = F.relu(self.lin1(x))
         x = F.dropout(x, p=self.dropout_ratio, training=self.training)
