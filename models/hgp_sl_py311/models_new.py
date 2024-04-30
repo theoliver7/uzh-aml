@@ -27,7 +27,7 @@ class Model(torch.nn.Module):
 
         self.convolutions.append(GCNConv(self.num_features, self.nhid))
         self.pooling_layers = torch.nn.ModuleList()
-        for _ in range(args['num_layers']):
+        for _ in range(args['num_layers']-1):
             self.convolutions.append(GCN(self.nhid, self.nhid))
 
             self.pooling_layers.append(
