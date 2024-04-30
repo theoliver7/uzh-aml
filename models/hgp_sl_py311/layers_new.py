@@ -30,7 +30,7 @@ class TwoHopNeighborhood(object):
             value = value.expand(-1, *list(edge_attr.size())[1:])
             edge_attr = torch.cat([edge_attr, value], dim=0)
             data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min',
-                                                  # fill_value=fill
+                                                  #fill_value=fill
                                                   )
             edge_attr[edge_attr >= fill] = 0
             data.edge_attr = edge_attr
@@ -157,8 +157,7 @@ class NodeInformationScore(MessagePassing):
 
 
 class HGPSLPool(torch.nn.Module):
-    def __init__(self, in_channels, ratio=0.8, sample=False, sparse=False, sl=True, lamb=1.0, negative_slop=0.2,
-                 dist="man"):
+    def __init__(self, in_channels, ratio=0.8, sample=False, sparse=False, sl=True, lamb=1.0, negative_slop=0.2):
         super(HGPSLPool, self).__init__()
         self.in_channels = in_channels
         self.ratio = ratio
@@ -167,8 +166,7 @@ class HGPSLPool(torch.nn.Module):
         self.sl = sl
         self.negative_slop = negative_slop
         self.lamb = lamb
-        # Our params
-        self.dist = dist
+
 
         self.att = Parameter(torch.Tensor(1, self.in_channels * 2))
         nn.init.xavier_uniform_(self.att.data)
@@ -179,14 +177,9 @@ class HGPSLPool(torch.nn.Module):
     def forward(self, x, edge_index, edge_attr, batch=None):
         if batch is None:
             batch = edge_index.new_zeros(x.size(0))
-        # x_information_score has the form of Tensor:(all_nodes_of_current_batch, nhid) (same form as x)
+        #x_information_score has the form of Tensor:(all_nodes_of_current_batch, nhid) (same form as x)
         x_information_score = self.calc_information_score(x, edge_index, edge_attr)
-        if self.dist == "man":
-            score = torch.sum(torch.abs(x_information_score), dim=1)
-        elif self.dist == "euc":
-            score = torch.sqrt(torch.sum(x_information_score ** 2, dim=1))
-        else:
-            raise Exception("Invalid Distance in args")
+        score = torch.sum(torch.abs(x_information_score), dim=1)
         """
         Graph Pooling is the first major component of the HGP-SL operator. It preserves a subset of informative nodes and forms a smaller induced subgraph.
         """
