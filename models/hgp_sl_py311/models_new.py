@@ -15,6 +15,7 @@ class Model(torch.nn.Module):
         self.num_classes = args["num_classes"]
         self.pooling_ratio = args["pooling_ratio"]
         self.dropout_ratio = args["dropout_ratio"]
+        self.negative_slope = args["negative_slope"]
         self.sample = args["sample_neighbor"]
         self.sparse = args["sparse_attention"]
         self.sl = args["structure_learning"]
@@ -25,14 +26,19 @@ class Model(torch.nn.Module):
         self.convolutions = torch.nn.ModuleList()
 
         self.convolutions.append(GCNConv(self.num_features, self.nhid))
-        self.convolutions.append(GCN(self.nhid, self.nhid))
-        self.convolutions.append(GCN(self.nhid, self.nhid))
-
         self.pooling_layers = torch.nn.ModuleList()
-        self.pooling_layers.append(
-            HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb, self.dist))
-        self.pooling_layers.append(
-            HGPSLPool(self.nhid, self.pooling_ratio, self.sample, self.sparse, self.sl, self.lamb, self.dist))
+        for _ in range(args['num_layers']):
+            self.convolutions.append(GCN(self.nhid, self.nhid))
+
+            self.pooling_layers.append(
+                HGPSLPool(self.nhid,
+                          self.pooling_ratio,
+                          self.sample,
+                          self.sparse,
+                          self.sl,
+                          self.lamb,
+                          self.negative_slope,
+                          self.dist))
 
         self.lin1 = torch.nn.Linear(self.nhid * 2, self.nhid)
         self.lin2 = torch.nn.Linear(self.nhid, self.nhid // 2)
@@ -44,18 +50,12 @@ class Model(torch.nn.Module):
         edge_attr = None
         concat = []
         for idx, conv in enumerate(self.convolutions):
-            x = conv(x, edge_index, edge_attr)
-            if idx == 0:
-                x = F.relu(x)
+            x = F.relu(conv(x, edge_index, edge_attr))
             if idx != len(self.convolutions) - 1:
-                x, edge_index, edge_attr, batch = self.pooling_layers[0](x, edge_index, edge_attr, batch)
+                x, edge_index, edge_attr, batch = self.pooling_layers[idx](x, edge_index, edge_attr, batch)
             concat.append(torch.cat([gmp(x, batch), gap(x, batch)], dim=1))
 
-        x = F.relu(self.conv3(x, edge_index, edge_attr))
-
         x = sum(F.relu(x_layer) for x_layer in concat)
-
-        # x = F.relu(x1) + F.relu(x2) + F.relu(x3)
 
         x = F.relu(self.lin1(x))
         x = F.dropout(x, p=self.dropout_ratio, training=self.training)
