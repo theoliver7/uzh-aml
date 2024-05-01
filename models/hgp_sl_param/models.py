@@ -20,7 +20,7 @@ class Model(torch.nn.Module):
         self.sparse = args["sparse_attention"]
         self.sl = args["structure_learning"]
         self.lamb = args["lamb"]
-
+        self.layers_readout = args["layers_readout"]
         self.dist = args["dist"]
 
         self.convolutions = torch.nn.ModuleList()
@@ -55,7 +55,9 @@ class Model(torch.nn.Module):
                 x, edge_index, edge_attr, batch = self.pooling_layers[idx](x, edge_index, edge_attr, batch)
             concat.append(torch.cat([gmp(x, batch), gap(x, batch)], dim=1))
 
-        x = sum(F.relu(x_layer) for x_layer in concat)
+        selected_layers = [concat[i] for i in self.layers_readout]
+        x = sum(F.relu(x_layer) for x_layer in selected_layers)
+        #x_test = F.relu(concat[0]) + F.relu(concat[1]) + F.relu(concat[3])
 
         x = F.relu(self.lin1(x))
         x = F.dropout(x, p=self.dropout_ratio, training=self.training)
