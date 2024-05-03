@@ -12,15 +12,20 @@ from torch_scatter import scatter_add
 from torch_sparse import spspmm, coalesce
 
 
+
 class TwoHopNeighborhood(object):
     def __call__(self, data):
         edge_index, edge_attr = data.edge_index, data.edge_attr
         n = data.num_nodes
 
         fill = 1e16
-        value = edge_index.new_full((edge_index.size(1),), fill, dtype=torch.float)
+        value = edge_index.new_full((edge_index.size(1),), fill, dtype=torch.float, requires_grad=True)
 
-        index, value = spspmm(edge_index, value, edge_index, value, n, n, n, True)
+        index = torch.sparse_coo_tensor(edge_index, value, (n,n)).coalesce()
+        c = torch.sparse.mm(index, index).coalesce()
+        row, col = c.indices()[0], c.indices()[1]
+        index = torch.stack([row, col], dim=0)
+        value = c.values()
 
         edge_index = torch.cat([edge_index, index], dim=1)
         if edge_attr is None:
@@ -29,9 +34,8 @@ class TwoHopNeighborhood(object):
             value = value.view(-1, *[1 for _ in range(edge_attr.dim() - 1)])
             value = value.expand(-1, *list(edge_attr.size())[1:])
             edge_attr = torch.cat([edge_attr, value], dim=0)
-            data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min',
-                                                  # fill_value=fill
-                                                  )
+
+            data.edge_index, edge_attr = coalesce(edge_index, edge_attr, n, n, op='min')
             edge_attr[edge_attr >= fill] = 0
             data.edge_attr = edge_attr
 
