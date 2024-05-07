@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.hgp_sl_param.sparse_softmax import Sparsemax
 from torch.nn import Parameter
 from torch_geometric.data import Data
 from torch_geometric.nn.conv import MessagePassing
@@ -9,8 +8,9 @@ from torch_geometric.nn.pool.connect.filter_edges import filter_adj
 from torch_geometric.nn.pool.select.topk import topk
 from torch_geometric.utils import softmax, dense_to_sparse, add_remaining_self_loops
 from torch_scatter import scatter_add
-from torch_sparse import spspmm, coalesce
+from torch_sparse import coalesce
 
+from models.hgp_sl_param.sparse_softmax import Sparsemax
 
 
 class TwoHopNeighborhood(object):
