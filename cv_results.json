@@ -1,5 +1,5 @@
 [
-   {
+   [{
       "arguments": {
          "device": "cuda",
          "seed": 777,
@@ -27,7 +27,7 @@
       },
       "average fold accuracy": 0.7596598458676588,
       "average fold loss": 2.0377333223819734
-   },
+   }],
    [
       {
          "arguments": {
