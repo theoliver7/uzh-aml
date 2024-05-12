@@ -217,7 +217,9 @@
             "lamb": 1.0,
             "dist": "man",
             "num_layers": 2,
-            "layers_readout": [0],
+            "layers_readout": [
+                0
+            ],
             "num_classes": 2,
             "num_features": 89
         },
@@ -243,7 +245,9 @@
             "lamb": 1.0,
             "dist": "man",
             "num_layers": 2,
-            "layers_readout": [1],
+            "layers_readout": [
+                1
+            ],
             "num_classes": 2,
             "num_features": 89
         },
@@ -298,7 +302,9 @@
             "lamb": 1.0,
             "dist": "euc",
             "num_layers": 2,
-            "layers_readout": [0],
+            "layers_readout": [
+                0
+            ],
             "num_classes": 2,
             "num_features": 89
         },
@@ -324,11 +330,70 @@
             "lamb": 1.0,
             "dist": "euc",
             "num_layers": 2,
-            "layers_readout": [1],
+            "layers_readout": [
+                1
+            ],
             "num_classes": 2,
             "num_features": 89
         },
         "average fold accuracy": 0.7586987332801842,
         "average fold loss": 1.9951941817998886
+    },
+    {
+        "arguments": {
+            "device": "cuda",
+            "seed": 777,
+            "batch_size": 64,
+            "lr": 0.0001,
+            "weight_decay": 0.001,
+            "epochs": 1000,
+            "patience": 100,
+            "nhid": 128,
+            "pooling_ratio": 0.8,
+            "dropout_ratio": 0.5,
+            "sample_neighbor": true,
+            "sparse_attention": true,
+            "structure_learning": true,
+            "negative_slope": 0.2,
+            "lamb": 1.0,
+            "dist": "man",
+            "num_layers": 2,
+            "layers_readout": [
+                0,
+                1
+            ],
+            "num_classes": 2,
+            "num_features": 89
+        },
+        "average fold accuracy": 0.7652759323235008,
+        "average fold loss": 1.9153987288475036
+    },
+    {
+        "arguments": {
+            "device": "cuda",
+            "seed": 777,
+            "batch_size": 64,
+            "lr": 0.0001,
+            "weight_decay": 0.001,
+            "epochs": 1000,
+            "patience": 100,
+            "nhid": 128,
+            "pooling_ratio": 0.8,
+            "dropout_ratio": 0.5,
+            "sample_neighbor": true,
+            "sparse_attention": true,
+            "structure_learning": true,
+            "negative_slope": 0.2,
+            "lamb": 1.0,
+            "dist": "man",
+            "num_layers": 2,
+            "layers_readout": [
+                0
+            ],
+            "num_classes": 2,
+            "num_features": 89
+        },
+        "average fold accuracy": 0.7624811763663744,
+        "average fold loss": 1.9839464962482452
     }
 ]
