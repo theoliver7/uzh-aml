@@ -10,7 +10,7 @@ DD_d = DD_data.data
 DD_t = DD_data.target
 
 # Split data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(DD_d, DD_t, test_size=0.1, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(DD_d, DD_t, test_size=0.1, random_state=777)
 
 # Define kernel
 kernel = ShortestPath(normalize=True, with_labels=False)
@@ -23,7 +23,11 @@ K_test = kernel.transform(X_test)
 svm = SVC(kernel='precomputed')
 svm.fit(K_train, y_train)
 
+y_train_pred = svm.predict(K_train)
+accuracy = accuracy_score(y_train, y_train_pred)
+print(f"Training Accuracy: {accuracy:.4f}")
+
 # Predictions
 y_pred = svm.predict(K_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy:.4f}")
+print(f"Test Accuracy: {accuracy:.4f}")
