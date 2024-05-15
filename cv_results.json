@@ -710,5 +710,91 @@
         },
         "average fold accuracy": 0.7511825671007175,
         "average fold loss": 2.0135607033967973
+    },
+       {
+        "arguments": {
+            "device": "cuda",
+            "seed": 777,
+            "batch_size": 64,
+            "lr": 0.0001,
+            "weight_decay": 0.001,
+            "epochs": 1000,
+            "patience": 100,
+            "nhid": 128,
+            "pooling_ratio": 0.8,
+            "dropout_ratio": 0.5,
+            "sample_neighbor": true,
+            "sparse_attention": true,
+            "structure_learning": true,
+            "negative_slope": 0.2,
+            "lamb": 1.0,
+            "dist": "euc",
+            "num_layers": 3,
+            "layers_readout": [
+                2
+            ],
+            "num_classes": 2,
+            "num_features": 89
+        },
+        "average fold accuracy": 0.7295464611568784,
+        "average fold loss": 2.2699017405509947
+    },
+    {
+        "arguments": {
+            "device": "cuda",
+            "seed": 777,
+            "batch_size": 64,
+            "lr": 0.0001,
+            "weight_decay": 0.001,
+            "epochs": 1000,
+            "patience": 100,
+            "nhid": 128,
+            "pooling_ratio": 0.8,
+            "dropout_ratio": 0.5,
+            "sample_neighbor": true,
+            "sparse_attention": true,
+            "structure_learning": true,
+            "negative_slope": 0.2,
+            "lamb": 1.0,
+            "dist": "euc",
+            "num_layers": 3,
+            "layers_readout": [
+                0
+            ],
+            "num_classes": 2,
+            "num_features": 89
+        },
+        "average fold accuracy": 0.7728452475861458,
+        "average fold loss": 1.9725215911865235
+    },
+    {
+        "arguments": {
+            "device": "cuda",
+            "seed": 777,
+            "batch_size": 64,
+            "lr": 0.0001,
+            "weight_decay": 0.001,
+            "epochs": 1000,
+            "patience": 100,
+            "nhid": 128,
+            "pooling_ratio": 0.8,
+            "dropout_ratio": 0.5,
+            "sample_neighbor": true,
+            "sparse_attention": true,
+            "structure_learning": true,
+            "negative_slope": 0.2,
+            "lamb": 1.0,
+            "dist": "euc",
+            "num_layers": 3,
+            "layers_readout": [
+                0,
+                1,
+                2
+            ],
+            "num_classes": 2,
+            "num_features": 89
+        },
+        "average fold accuracy": 0.7229338293914431,
+        "average fold loss": 2.19506374001503
     }
 ]
