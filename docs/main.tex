@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{multirow}
+\usepackage[margin=1cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\title{AML}
+\author{oliverrobin.aschwanden }
+\date{May 2024}
+
+\begin{document}
+
+\maketitle
+\begin{table}[t]
+\caption{Modifications made to the HGP-SL architecture and their evaluation through K-fold cross-validation (K=5) on the D\&D dataset.}
+\label{tab:variations}
+\begin{center}
+\vspace{-2mm}
+%\scalebox{1.0}{
+\begin{tabular}{c|cccc|lll}
+\hline\rule{0pt}{2.0ex}
+ & \multirow{2}{*}{$Distance Metric$} & \multirow{2}{*}{$Layers$} &
+\multirow{2}{*}{$Pooling Ratio$} & \multirow{2}{*}{$Readout$} &  \multicolumn{3}{c}{Validation Accuracy}\\
+&&&&&avg & min & max\\
+% & & & & & & & & & & & & \\
+\hline\rule{0pt}{2.0ex}
+(base) & Manhattan & 2 & 0.3 & [1,2] &  76.0&  74.0&  79.8\\
+\hline\rule{0pt}{2.0ex}
+\multirow{1}{*}{(distance)}
+& Euclidean & &  &  & 75.7 (-0.3) &  71.6&  77.8   \\
+\hline\rule{0pt}{2.0ex}
+\multirow{3}{*}{(layers)}
+& & 3&  &  & 76.0 (=) &  74.0&  76.8 \\
+& & 4&  &  & 76.7 (+0.7)&  75.0&  78.7  \\
+& & 5&  &  & 75.5 (-0.5) &  73.1&  77.4  \\
+\hline\rule{0pt}{2.0ex}
+\multirow{2}{*}{(pooling ratio)}
+& & &  0.8 &  & 76.9 (+0.9) &  73.5&  81.2 \\
+& & &  0.5&  & 77.0  (+1.0) &  73.1&  80.7\\
+& & &  0.2&  & 75.0  (-1.0) &  71.2&  77.9\\
+\hline\rule{0pt}{2.0ex}
+\multirow{1}{*}{(readout)}
+& & &  & [1] & 76.1 (+0.1)  &  73.5&  77.4 \\
+& & &  & [2] & 76.1 (+0.1)  &  73.1&  79.7 \\
+\hline\rule{0pt}{3.0ex}
+(grid search) & Manhattan  & 2 &  0.8  & [1] &\textbf{77.2 (+1.2)}&  -&  -\\
+\hline
+\end{tabular}
+%}
+\end{center}
+\end{table}
+
+
+\begin{table}[t]
+\begin{center}
+\caption{Comparison of training and test accuracies with respect to the shortest path baseline and the original $HGP-SL$ paper.}
+\vspace{1mm}
+\label{tab:wmt-results}
+%\scalebox{1.0}{
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{Training} &  \textbf{Test} \\
+
+\hline
+Shortest Path Kernel  & 76.5 & 69.4\\
+$HGP-SL_{original}$  & 84.4 & 78.6 \\
+\hline
+Ours  & 85.6 & 78.6 \\
+%$Grid search best accuracy$ & 84.2 & 76.06\\
+%$Grid search best loss$ & 85.57 & 78.63
+%\hline
+%\specialrule{1pt}{-1pt}{0pt}
+%\rule{0pt}{2.0ex}
+\bottomrule
+\end{tabular}
+%}
+\end{center}
+\end{table}
+
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Options} & \textbf{Selected Parameter} \\
+\midrule
+Layers           & 2, 3                  &  2\\ 
+Pooling Ratio    & 0.2, 0.5, 0.8         & 0.8 \\ 
+Distance Metric  & Manhattan, Euclidean  & Manhattan \\ 
+Readout Layers  & ALL, FIRST, LAST             & LAST \\ 
+\bottomrule
+\end{tabular}
+\caption{Grid Search of Hyperparameters}
+\label{tab:gridsearch}
+\end{table}
+\end{document}
